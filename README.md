@@ -41,7 +41,7 @@ Note: ganache chain node and ESP should be in the same subnet
 # CI
 There are in .github/workflows/ files:\
 web3esp.yml \
-to chech in local PC run:\
+to check in local PC run:\
 act -j esp
 
 # Deploy to  ESP
