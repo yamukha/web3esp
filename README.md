@@ -40,7 +40,9 @@ Note: ganache chain node and ESP should be in the same subnet
 
 # CI
 There are in .github/workflows/ files:\
-TODO/FIX: esp.yml after moving to airlab repo
+web3esp.yml \
+to chech in local PC run:\
+act -j esp
 
 # Deploy to  ESP
 1. Set up in DefineEth.h Linux or ESP mode (target ESP8266 or ESP32), proper ECDSA library and it entropy settings.
