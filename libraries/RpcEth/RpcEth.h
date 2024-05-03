@@ -22,16 +22,9 @@ std::string rpcEth (WiFiClient wifi, std::string url, std::string method, std::s
      JSONVar params; 
      String jsonString;
      std::string rpc_result = "";
-      
-     /*
-     if ( "" == param){
-       jsonString = ethJsonNoParam(method, cnt); 
-     } else { 
-       jsonString = ethJsonWithParam(method, param, cnt);
-     }
-     */
+
      jsonString = ethJson(method, param, cnt);
-     Serial.println(jsonString);      
+     log_printf("%s \n",jsonString.c_str());
 
      // Send raw transaction ETH by curl ... -data '{"jsonrpc":"2.0","method":"eth_sendRawTransaction","params":["0x.."]}'
      int httpCode = http.POST(jsonString);
@@ -40,7 +33,7 @@ std::string rpcEth (WiFiClient wifi, std::string url, std::string method, std::s
          log_printf("[HTTP]+POST code: %d\n", httpCode);
          if (httpCode == HTTP_CODE_OK) {
               const String& payload = http.getString();
-              Serial.println(payload);
+              log_printf("%s \n",payload.c_str());
               std::string rpc_result = parseJsonResult(payload);
               return rpc_result;
          }
@@ -48,6 +41,4 @@ std::string rpcEth (WiFiClient wifi, std::string url, std::string method, std::s
     return rpc_result;
 }
 
-// EthRpc rpcProvider(client, eth_url, PRIV_KEY, SS58_ADR, id_counter);
-// EthsRpc (WiFiClient client, std::string url, std::string key, std::string ss58adr, uint64_t id)
 #endif
