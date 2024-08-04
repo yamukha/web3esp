@@ -29,7 +29,7 @@ jobs:
           echo '      - http://arduino.esp8266.com/stable/package_esp8266com_index.json' >> $ARDUINO_YAML
           arduino-cli core update-index
           arduino-cli core install esp8266:esp8266
-          arduino-cli core install esp32:esp32
+          arduino-cli core install esp32:esp32@2.0.14
         
       - name: Clone web3 esp repo
         run: |
