@@ -1,6 +1,17 @@
 #ifndef DEFINE_ETH_H
 #define DEFINE_ETH_H
 
+// #define USE_JSON11
+// #define USE_JSON
+#ifdef USE_JSON11
+#define USE_JSON_OR_JSON11
+#undef USE_JSON
+#endif
+#ifdef USE_JSON
+#define USE_JSON_OR_JSON11
+#undef USE_JSON11
+#endif
+
 #ifndef USE_LINUX
 #define USE_ARDUINO
 

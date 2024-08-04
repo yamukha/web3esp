@@ -19,7 +19,7 @@ std::string rpcEth (WiFiClient wifi, std::string url, std::string method, std::s
      http.begin(wifi, url.c_str());
      http.addHeader("Content-Type", "application/json");
      log_printf("[HTTP]+POST:\n"); 
-     JSONVar params; 
+
      String jsonString;
      std::string rpc_result = "";
 
