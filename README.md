@@ -1,7 +1,8 @@
 # Solution to submit transaction to ETH chain using microcontroller like ESP8266 or ESP32
 
 # Inplemented extrinsic methods
-Transfer balance as Raw Transaction
+Transfer balance as Raw Transaction\
+Smart contract (see smart contract example in libraries/contracts). Note: supported uint256 and string type
 
 # Implementetiaon
 Refference pyton scripts: web3eth.py (high level) and rlp4eth.py (low level, based on secp256k1 library for ECDSA sign)\
@@ -26,6 +27,7 @@ run build script:
 Install ganache-cli, note: maybe need to install proper vesion of nmp\
 Run ganache as deterministic chain node (with the same private key every new start:)\
 ganache-cli -d -h 0.0.0.0
+In case of smart contract usage is needed to upload it, i.e. by Remix to local host node.
 
 # Test cases:
 1. Test on Linux and python implementation (ref. to cripts code):

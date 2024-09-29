@@ -8,6 +8,8 @@
 #include <ethsign.h>
 
 #include <Web3e.h>
+#include <Contract.h>
+#include <contract_g5.h>
 
 #ifdef ESP32_MODEL
 #include <WiFi.h>
@@ -31,6 +33,8 @@ std::string chainID = "";
 int cnt = 0;
 Web3 web3;
 bool web3init = false;
+Contract c;
+std::vector<ScmSig> scmSig = c.abiParser(contract_g5);
 
 void setup()
 {
@@ -54,7 +58,9 @@ void setup()
 #ifdef USE_TREZOR
   log_printf("Used Trezor \n");
 #endif
- 
+
+  log_printf("used library: %s\n", usedJson);
+
   Serial.printf("\nConnecting\n");
   WiFi.begin(STASSID, STAPSK);
   Serial.printf("Trying to connected to SSID: %s \n", STASSID);
@@ -65,7 +71,8 @@ void setup()
   }
   Serial.print("\nConnected and get IP address: ");
   Serial.println(WiFi.localIP());
-  
+
+  c.AllFunctions(scmSig);
 }
 
 void loop()
@@ -91,10 +98,10 @@ void loop()
       }
       else {
         log_printf("\nNo any ETH accounts found\n");
-      }      
+      }
       web3init = true;
-    }    
- 
+    }
+
     std::string nonce = "";
 
     if ("" == chainID)
@@ -116,25 +123,43 @@ void loop()
       // web3.eth.signTransaction (tx, address);
       // where: address is signer address to get it's pub and secret keys from accounts storage
       //        tx is transaction object:
-      std::string price = "0x04a817c800";
-      std::string limit = "0x1e8480";
-      std::string to = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0";
-      std::string value = "0x0386a0";
-      std::string data = std::to_string(cnt).c_str();
-      
-      raw_transaction = web3.eth.signTransaction (nonce, chainID, price, limit, to, value, data, web3.eth.defaultAccount);
+
+      bool isContract = true;
+      if (!isContract) // simple Transaction
+      {
+        std::string price = "0x04a817c800";
+        std::string limit = "0x1e8480";
+        std::string to = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0";
+        std::string value = "0x0386a0";
+        std::string data = std::to_string(cnt).c_str();
+        raw_transaction = web3.eth.signTransaction(nonce, chainID, price, limit, to, value, data, web3.eth.defaultAccount);
+      }
+      else // smart contract call
+      {
+        std::string price = "0x77359400"; // 2000000000 -> 0x77359400
+        std::string limit = "0x1e8480";
+        std::string to = "0xd9145CCE52D386f254917e481eB44e9943F39138"; // smart contract address
+        std::string value = "0";
+        std::string m = c.buildMethod("%s(%s,%llu)", "set_string", "'some parameter maximum value = '", cnt);
+        log_printf("Called method: %s\n", m.c_str());
+        auto fhash = c.funcHash(m);
+        CallData cd = c.doCall(m);
+        std::string data = fhash + cd.stat + cd.dynamic;
+        raw_transaction = web3.eth.signTransaction(nonce, chainID, price, limit, to, value, data, web3.eth.defaultAccount);
+      }
       log_printf("Nonce: %s, Raw transaction:\n%s\n", nonce.c_str(), raw_transaction.c_str());
-    } 
-    else 
-        log_printf("!Cannot get nonce!\n");
-    
+    }
+    else
+      log_printf("!Cannot get nonce!\n");
+
     if (raw_transaction != "")
     {
-      std::string resRpc = web3.eth.sendSignedTransaction(raw_transaction); 
+      std::string resRpc = web3.eth.sendSignedTransaction(raw_transaction);
     }
-     else 
-        log_printf("!Cannot send transaction!\n");
-        
+    else
+      log_printf("!Cannot send transaction!\n");
+
     delay(1000);
+    cnt++;
   }
 }

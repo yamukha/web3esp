@@ -128,7 +128,11 @@ std::string subBigHex(std::string a, std::string b)
 #endif
 
 #ifdef USE_SECP256K1
+#ifdef USE_LINUX
+#include "../secp256k1-embedded/src/ethc.h"
+#else
 #include <ethc.h>
+#endif
 struct eth_ecdsa_signature sign;
 #endif
 
@@ -151,11 +155,12 @@ std::string ethSign(std::string nonce, std::string chain, std::string price, std
   tx.s = "0x00"; // then be calculated i.e. "0x5c5b1c73e65e9a4e9c73b13e3825f517efcc35eac11958c7f314b57c39006738";
 
   std::string enc = rlp.bytesToHex(rlp.encode(tx, true)); // initial PLR with chain ID, r = 0, s =0
-  std::string len = rlp.encodeLength(strlen(enc.c_str()) / 2, RLP_BLOCK_PREFIX);
-  std::string header = rlp.intToHex(enc.length() / 2 + RLP_BLOCK_PREFIX);
-
+  std::string header = rlp.LengthHeader(enc);
   std::string ser = header + enc;
+
 #ifdef DEBUG_PRINT
+  log_printf("RPL of unsigned transaction, no header:\n0x%s , size = %ld\n", enc.c_str(), strlen(enc.c_str()));
+  log_printf("RPL encoded len : 0x%s\n", header.c_str());
   log_printf("RPL of unsigned transaction:\n0x%s , size = %ld\n", ser.c_str(), strlen(ser.c_str()));
 #endif
 

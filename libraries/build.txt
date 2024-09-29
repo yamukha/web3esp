@@ -45,3 +45,14 @@ Sketch uses 540481 bytes (51%) of program storage space. Maximum is 1044464 byte
 Global variables use 47028 bytes (57%) of dynamic memory, leaving 34892 bytes for local variables. Maximum is 81920 bytes.
 
 
+with smart contract
+Executable segment sizes:
+ICACHE : 32768           - flash instruction cache 
+IROM   : 506064          - code in flash         (default or ICACHE_FLASH_ATTR) 
+IRAM   : 26885   / 32768 - code in IRAM          (IRAM_ATTR, ISRs...) 
+DATA   : 1732  )         - initialized variables (global, static) in RAM/HEAP 
+RODATA : 16872 ) / 81920 - constants             (global, static) in RAM/HEAP 
+BSS    : 30576 )         - zeroed variables      (global, static) in RAM/HEAP 
+Sketch uses 551553 bytes (52%) of program storage space. Maximum is 1044464 bytes.
+Global variables use 49180 bytes (60%) of dynamic memory, leaving 32740 bytes for local variables. Maximum is 81920 bytes.
+

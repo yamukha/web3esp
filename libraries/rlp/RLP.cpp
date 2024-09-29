@@ -16,22 +16,70 @@ string RLP::encode(string s)
     return encodeLength(s.size(), 128) + s;
   }
 }
+
+string RLP::encodeStrLong(string str)
+{
+  std::string temp = "";
+  int bytes = 0;
+  if (str.length() < 256)
+    bytes = 1;
+  else if (str.length() > 256 && str.length() < 256 * 256)
+    bytes = 2;
+
+  temp = (char)(RLP_BLOCK_PREFIX_B7 + bytes);
+
+  if (bytes == 1)
+  {
+    std::string msb = "";
+    msb = (char)(str.length());
+    return temp + msb + str;
+  }
+  else // data lenth limited to 2 bytes
+  {
+    std::string msb = "";
+    std::string lsb = "";
+    msb = (char)(str.length() / 256);
+    lsb = (char)(str.length() % 256);
+    return temp + msb + str;
+  }
+}
+
 string RLP::encode(TX tx, bool toSign) // or to send
 {
-  string serialized = hexToRlpEncode(tx.nonce) +
-                      hexToRlpEncode(tx.gasPrice) +
-                      hexToRlpEncode(tx.gasLimit) +
-                      hexToRlpEncode(tx.to) +
-                      hexToRlpEncode(tx.value) +
-                      hexToRlpEncode(tx.data) +
-                      hexToRlpEncode(tx.v) +
-                      hexToRlpEncode(tx.r) +
-                      hexToRlpEncode(tx.s);
-  if (toSign) // serialized without header
-    return serialized;
+  if (tx.data.length() < RLP_BLOCK_0_TO_55)
+  {
+    string serialized = hexToRlpEncode(tx.nonce) +
+                        hexToRlpEncode(tx.gasPrice) +
+                        hexToRlpEncode(tx.gasLimit) +
+                        hexToRlpEncode(tx.to) +
+                        hexToRlpEncode(tx.value) +
+                        hexToRlpEncode(tx.data) +
+                        hexToRlpEncode(tx.v) +
+                        hexToRlpEncode(tx.r) +
+                        hexToRlpEncode(tx.s);
 
-  else // with header for signed raw transaction
-    return hexToBytes(encodeLength(serialized.length(), 192)) + serialized;
+    if (toSign) // serialized without header
+      return serialized;
+    else // with header for signed raw transaction
+      return hexToBytes(encodeLength(serialized.length(), 192)) + serialized;
+  }
+  else
+  {
+    string serialized = hexToRlpEncode(tx.nonce) +
+                        hexToRlpEncode(tx.gasPrice) +
+                        hexToRlpEncode(tx.gasLimit) +
+                        hexToRlpEncode(tx.to) +
+                        hexToRlpEncode(tx.value) +
+                        hexToRlpEncodeStrLong(tx.data) +
+                        hexToRlpEncode(tx.v) +
+                        hexToRlpEncode(tx.r) +
+                        hexToRlpEncode(tx.s);
+
+    if (toSign) // serialized without header
+      return serialized;
+    else // with header for signed raw transaction
+      return hexToBytes(encodeLength(serialized.length(), 192)) + serialized;
+  }
 }
 
 string RLP::hexToBytes(string s)
@@ -50,6 +98,16 @@ string RLP::hexToRlpEncode(string s)
 
   return encode(hexToBytes(s));
 }
+
+string RLP::hexToRlpEncodeStrLong(string &s)
+{
+  s = removeHexFormatting(s);
+  if (1 == s.length() % 2) // fix to add extra leading zero
+    s = "0" + s;
+
+  return encodeStrLong(hexToBytes(s));
+}
+
 string RLP::removeHexFormatting(string s)
 {
   if (s[0] == '0' && s[1] == 'x')
@@ -73,6 +131,31 @@ string RLP::encodeLength(int len, int offset)
     return fByte + hexLength;
   }
 }
+
+string RLP::LengthHeader(std::string &str)
+{
+  string temp;
+  if (str.length() / 2 < RLP_BLOCK_0_TO_55)
+  {
+    int encLength = RLP_BLOCK_PREFIX_C0 + str.length() / 2;
+    // printf("Encoded Length %x\n", encLength);
+    return intToHex(encLength);
+  }
+  else
+  {
+    int bytes = 0;
+    if (str.length() / 2 < 256)
+      bytes = 1;
+    else if (str.length() / 2 > 256 && str.length() / 2 < 256 * 256)
+      bytes = 2;
+
+    int encLength = RLP_BLOCK_PREFIX_F7 + bytes;
+    temp = intToHex(encLength) + intToHex(str.length() / 2);
+    // printf("Encoded Length %s\n", temp.c_str());
+    return temp;
+  }
+}
+
 string RLP::intToHex(int n)
 {
   stringstream stream;

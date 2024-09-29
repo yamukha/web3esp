@@ -5,7 +5,8 @@ from eth_keys import keys
 from eth_utils import decode_hex
 
 eth_host = "http://192.168.0.106:8545"
-privKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
+privKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"  # 0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1
+# privKey = "2caa8ee480bc8b2fcdf8499027e53a6d5c577a53aa5be6239a328a0fb7fabfac" # 0x995A0673d6B73F1f804AE191253e5716dF676081
 
 # python3 ethraw.py 1 http://192.168.0.106:8545 4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d
 cnt = 0
