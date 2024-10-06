@@ -1,8 +1,4 @@
-#ifndef CONTRACT_G5_H
-#define CONTRACT_G5_H
-#include <string>
-
-const std::string contract_g5 = R"([
+[
 	{
 		"inputs": [],
 		"name": "get_output",
@@ -140,5 +136,4 @@ const std::string contract_g5 = R"([
 		"stateMutability": "pure",
 		"type": "function"
 	}
-])";
-#endif
+]

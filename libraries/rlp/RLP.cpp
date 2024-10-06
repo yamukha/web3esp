@@ -46,7 +46,7 @@ string RLP::encodeStrLong(string str)
 
 string RLP::encode(TX tx, bool toSign) // or to send
 {
-  if (tx.data.length() < RLP_BLOCK_0_TO_55)
+  if (tx.data.length() / 2 < RLP_BLOCK_0_TO_55)
   {
     string serialized = hexToRlpEncode(tx.nonce) +
                         hexToRlpEncode(tx.gasPrice) +

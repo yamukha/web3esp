@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 // Creating a contract
 contract g5
-{    
+{
+
     uint256 private cnt;
     uint256 private x;
     uint256 private y;
@@ -31,8 +32,16 @@ contract g5
         return (str);
     }
 
-     function set_string(string memory str, uint256 amount) public returns (string memory){
+    function set_string(string memory str, uint256 amount) public returns (string memory){
         cnt = amount;
         return (str);
+    }
+
+    function set_bytes(bytes14 bstr) public pure returns (string memory){
+        return string(abi.encodePacked(bstr));
+    }
+
+    function set_bool(bool flag) public pure returns (string memory){
+        return  string(abi.encodePacked(flag));
     }
 }

@@ -170,8 +170,32 @@ class Contract {
 
     return fhash;
   };
-   
-std::set<std::string> static_types = {"int", "int256", "uint256"};
+
+// static_types
+std::set<std::string> int_types = {"uint",                                               // as uint256
+  "uint8", "uint16", "uint24", "uint32", "uint40", "uint48", "uint56", "uint64",
+  "uint72", "uint80", "uint88", "uint96", "uint104", "uint112", "uint120", "uint128",
+  "uint136", "uint144", "uint152", "uint160", "uint168", "uint176", "uint184", "uint192",
+  "uint200", "uint208", "uint216", "uint224", "uint232", "uint240", "uint248", "uint256" };
+
+std::set<std::string> uint_types = {"int",                                              // as int256
+  "int8", "int16", "int24", "int32", "int40", "int48", "int56", "int64",
+  "int72", "int80", "int88", "int96", "int104", "int112", "int120", "int128",
+  "int136", "int144", "int152", "int160", "int168", "int176", "int184", "int192",
+  "int200", "int208", "int216", "int224", "int232", "int240", "int248", "int256",
+};
+
+std::set<std::string> byte_types = {
+  "bytes1","bytes2", "bytes3", "bytes4", "bytes5", "bytes5", "bytes7", "bytes8",
+  "bytes9","bytes10", "bytes11", "byte12", "bytes13", "bytes14", "bytes15", "bytes16",
+  "bytes17","bytes18", "bytes19", "bytes20", "bytes21", "bytes22", "bytes23", "bytes24",
+  "bytes25","bytes26", "bytes27", "bytes28", "bytes29", "bytes30", "bytes31", "bytes32" };
+
+std::set<std::string> bool_types = {"bool" }; // uint8
+std::set<std::string> address_types = {"address"}; // as uint160
+std::set<std::string> fixed_types = {"fixed", "ufixed"}; // as fixed128x18 from fixed<M>x<N> , ufixed128x18 from ufixed<M>x<N>
+std::set<std::string> function_types = {"function"}; // bytes24
+
 
 std::string number_to_hex_str32(uint64_t n)
 {
@@ -241,14 +265,33 @@ CallData doCall (std::string& signature) {
                 log_printf("Matched %s with %d args\n", fname[0].c_str(), args);
                 
                 for (auto& it: item.fargs) {
-                    if ( static_types.count(it.second)) {
+                    if ( int_types.count(it.second) || uint_types.count(it.second) || bool_types.count(it.second)
+                        || byte_types.count(it.second) || address_types.count(it.second)) {
                         std::string val = "0";
-                        if (it.second.find("int") != std::string::npos) { // TODO for any int,uint float etc.
-                          auto number = std::stoll(params[prm_counter], nullptr, 10);  // get real parameter
+                        if (uint_types.count(it.second)) { //  for any of uint
+                          auto number = std::stoull(params[prm_counter], nullptr, 10); // get signed parameter
+                          val = number_to_hex_str32(number); // max. 1234567890123444556 -> 000000000000000000000000000000000000000000000000112210F47DE9514C
+                        } else if (int_types.count(it.second)) { // for any of int
+                          auto number = std::stoll(params[prm_counter], nullptr, 10);  // get signed parameter
                           val = number_to_hex_str32(number);
+                        } else if (bool_types.count(it.second)) { // for bool
+                          log_printf("Parameter bool: %s\n",it.second.c_str());
+                          if (params[prm_counter] == "true") {
+                            val = number_to_hex_str32(1);
+                          } else {
+                            val = number_to_hex_str32(0);
                         }
-                        
-                        // max. 1234567890123444556 -> 000000000000000000000000000000000000000000000000112210F47DE9514C
+                        } else if (byte_types.count(it.second)) { // for any of bytes<M>, 0 < M <= 32, i.e. bytes3 = "abc"
+                          std::string str = "";
+                          str = params[prm_counter]; // get real parameter
+                          if (str[0] == '"' || str[0] == '\'') {  // remove quotes         
+                            str.pop_back();
+                            str.erase(str.begin());
+                          }
+                          log_printf("Parameter value is: %s\n", str.c_str());
+                          val = string_to_hex_str32(str);       // "me" -> 6d65000000000000000000000000000000000000000000000000000000000000
+                        }
+
                         log_printf("Parameter '%s' has static type '%s' with value %s\n", it.first.c_str(), it.second.c_str(), val.c_str());                        
                         stat += val;
                         log_printf("Encoded static:\n%s\n", stat.c_str());
@@ -260,7 +303,7 @@ CallData doCall (std::string& signature) {
                         std::string str = "";                   
                         if (it.second == "string") {
                           str = params[prm_counter]; // get real parameter
-                          if (str[0] == '"' || str[0] == '\'') {  // remove quotes         
+                          if (str[0] == '"' || str[0] == '\'') {  // remove quotes  
                             str.pop_back();
                             str.erase(str.begin());
                           }

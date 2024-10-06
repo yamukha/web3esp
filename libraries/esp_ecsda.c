@@ -70,18 +70,29 @@ int main(int argc, char *argv[])
         std::vector <ScmSig> scmSig = c.abiParser(contract_g5);
         c.AllFunctions(scmSig);    
         //std::string m = c.buildMethod("%s(%s,%llu)","set_string","'some parameter maximum value = '", cnt);
-        std::string m = c.buildMethod("%s(%llu,%llu)","set_output", 3, cnt);
-        log_printf("Called method: %s\n", m.c_str());
-        // std::string m = "set_string(\"some 'parameter maximum value = \",1234567890123444556)";
+        //std::string m = c.buildMethod("%s(%s)","set_string","'some parameter maximum value = '");
+        //std::string m = c.buildMethod("%s(%llu,%llu)","set_output", 3, cnt);
+        //std::string m = c.buildMethod("%s(%llu)","set_output", 3);
+        std::string m = c.buildMethod("%s(%s)","set_bytes", "'one'");
+        //std::string m = c.buildMethod("%s(%s)","set_bytes", "'hello bytes 42'");
+        //std::string m = c.buildMethod("%s(%s)","set_bool", "true");
+        //std::string m = c.buildMethod("%s", "get_output()";
+
+        //std::string m = "set_string(\"some 'parameter maximum value = \",1234567890123444556)";
         // std::string m = "set_string(\"me\")";
-        //std::string m = "set_output(3,42)";
-        //std::string m = "set_output(3)";
+        // std::string m = "set_output(3,42)";
+        // std::string m = "set_output(3)";
+        // std::string m = "set_bytes('one')";
+        // std::string m = "set_bool(true)";
         //std::string m = "get_output()";
+
+        log_printf("Called method: %s\n", m.c_str());
+
         auto fhash = c.funcHash(m);
         CallData cd = c.doCall(m);
         log_printf("Chain ID: %s Nonce: %s\n", chain_str.c_str(), nonce_str.c_str());
         std::string calldata = fhash + cd.stat + cd.dynamic;
-        log_printf("Calldata: \n%s\n", calldata.c_str());
+        log_printf("Calldata: \n%s\nCalldata len: %lu\n", calldata.c_str(), calldata.size());
 
         //for (auto& item : scmSig) {
         //    auto i =  &item  - &scmSig[0];
