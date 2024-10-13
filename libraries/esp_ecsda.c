@@ -4,6 +4,7 @@
 // ./ecdsa nonce chainId rpcId privKey
 // ./ecdsa 0x1 0x539 1 4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d | tail -n 1
 
+#include <random>
 #include <stdio.h>
 #include <string.h>
 
@@ -14,7 +15,7 @@
 #include "Web3E/src/Contract.h"
 #include "contracts/contract_g5.h"
 
-auto cnt = 0LLU; // max. to encode is 1234567890123444556LLU;
+// auto cnt = 0LLU; // max. to encode is 1234567890123444556LLU;
 
 int main(int argc, char *argv[])
 {
@@ -26,6 +27,12 @@ int main(int argc, char *argv[])
     std::string scArg1 = "42";
     std::string scArg2 = "3";
     bool isContract = false;
+
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> distr(0, 256*256 - 1);
+
+    int cnt =  distr(rng);
 
     for (int i = 0; i < argc; ++i)
     {
@@ -75,6 +82,10 @@ int main(int argc, char *argv[])
         //std::string m = c.buildMethod("%s(%llu)","set_output", 3);
         // std::string m = c.buildMethod("%s(%s)","set_bytes", "'one'");
         //std::string m = c.buildMethod("%s(%s)","set_bytes", "'hello bytes 42'");
+        std::string bytes = "[" + std::to_string(cnt/256) + " " + std::to_string(cnt%256) + " 0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31]";
+        log_printf("Bytes: %s\n", bytes.c_str());
+        std::string m = c.buildMethod("%s(%s)","set_bytes", bytes.c_str());
+        //std::string m = c.buildMethod("%s(%s)","set_bytes", "[0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31]");
         //std::string m = c.buildMethod("%s(%s)","set_bool", "true");
         //std::string m = c.buildMethod("%s", "get_output()";
 
@@ -83,10 +94,10 @@ int main(int argc, char *argv[])
         // std::string m = "set_output(3,42)";
         // std::string m = "set_output(3)";
         // std::string m = "set_bytes('one')";
-        //std::string m = "set_bytes([a 1 0 0xr2 0x3 0xff 0x7 00 127 000 255 256 0x09 xx])";
-        std::string m = "set_bytes([0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31])";
+        // std::string m = "set_bytes([a 1 0 0xr2 0x3 0xff 0x7 00 127 000 255 256 0x09 xx])";
+        // std::string m = "set_bytes([0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31])";
         // std::string m = "set_bool(true)";
-        //std::string m = "get_output()";
+        // std::string m = "get_output()";
 
         log_printf("Called method: %s\n", m.c_str());
 
