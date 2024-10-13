@@ -117,6 +117,7 @@ class Contract {
     return std::string( buf.get(), buf.get() + size - 1 ); // remove '\0'
   }
 
+  /*
   std::vector<std::string> split (const std::string &s, char delim) {
     std::vector<std::string> result;
     std::stringstream ss (s);
@@ -127,6 +128,18 @@ class Contract {
     }
 
     return result;
+  }
+  */
+
+  std::vector<std::string> split(const std::string& str, char delim) {
+    std::vector<std::string> strings;
+    size_t start;
+    size_t end = 0;
+    while ((start = str.find_first_not_of(delim, end)) != std::string::npos) {
+        end = str.find(delim, start);
+        strings.push_back(str.substr(start, end - start));
+    }
+    return strings;
   }
 
   std::string funcHash (std::string &signature) {
@@ -196,7 +209,6 @@ std::set<std::string> address_types = {"address"}; // as uint160
 std::set<std::string> fixed_types = {"fixed", "ufixed"}; // as fixed128x18 from fixed<M>x<N> , ufixed128x18 from ufixed<M>x<N>
 std::set<std::string> function_types = {"function"}; // bytes24
 
-
 std::string number_to_hex_str32(uint64_t n)
 {
     std::string result = "0000000000000000000000000000000000000000000000000000000000000000";
@@ -222,6 +234,69 @@ std::string string_to_hex_str32(std::string &str)
       stream << std::hex << (int)str[i];
 
     std::string res(stream.str());
+    if (res.size() < 64) {
+        result.resize(64 - res.size());
+        res += result ;
+    }
+
+    return res;
+};
+
+std::string bytes_to_hex_str32(std::string &str)
+{
+    std::string result = "0000000000000000000000000000000000000000000000000000000000000000";
+
+    std::vector <std::string> v = split (str, ' ');
+    std::string bytes = "";
+    int i = 0;
+    for (auto& b : v) {
+      // check 0..0xFF & extends with leading zero
+      if (b.size() > 2 && b.size() <= 4 && (b[0] == '0' && (b[1] == 'x' || b[1] == 'X') ) ) {
+        if (b == "0x0" || b == "0x00") {
+            bytes += "00";
+        } else {
+          char* p_end{};
+          const long numb = std::strtol(b.c_str(), &p_end, 16);
+          if (numb > 0 && numb <= 0xFF) {
+            b.erase(b.begin());
+            b.erase(b.begin());
+            // extend with leading zero
+            if (b.size() == 1)
+              bytes += "0" + b;
+            else
+              bytes += b;
+          } else {
+            log_printf("Error: not in range 0..0xFF, cannot convert with strtol(%s)\n",b.c_str());
+          }
+        }
+      } else if (b.size() > 0 && b.size() < 4) {
+      // check 0..255 & decimal to hex & extends with leading zero
+        if (b == "0" || b == "00"  || b == "000" ) {
+            bytes += "00";
+        } else {
+          char* p_end{};
+          const long numb = std::strtol(b.c_str(), &p_end, 10);
+          if (numb > 0 && numb <= 0xFF) {
+            char buff[4];
+            std::sprintf(buff, "%02X", unsigned (numb));
+            std::string hexstr(buff);
+            bytes += hexstr;
+          } else {
+            log_printf("Error: not in range 0..255, cannot convert with strtol(%s)\n",b.c_str());
+          }
+        }
+      }
+      else {
+        log_printf("Error: cannot convert %s\n",b.c_str());
+      }
+      if (bytes.size() >= 64) {
+        if (b != v[v.size()-1])
+          log_printf("Warn: some extra bytes can be lost after '%s' at position %d \n", b.c_str(), i);
+        break;
+      };
+      i++;
+    }
+    std::string res = bytes;
     if (res.size() < 64) {
         result.resize(64 - res.size());
         res += result ;
@@ -282,14 +357,20 @@ CallData doCall (std::string& signature) {
                             val = number_to_hex_str32(0);
                         }
                         } else if (byte_types.count(it.second)) { // for any of bytes<M>, 0 < M <= 32, i.e. bytes3 = "abc"
-                          std::string str = "";
-                          str = params[prm_counter]; // get real parameter
-                          if (str[0] == '"' || str[0] == '\'') {  // remove quotes         
+                          std::string str = params[prm_counter];  // get real parameter
+                          // if smth. like [0x0 0x42 ...] or [0 33 ...] handle as list of chars
+                          if (str[0] == '[' && str[str.length() - 1] == ']') {  // handle as list of chars
                             str.pop_back();
                             str.erase(str.begin());
+                            val = bytes_to_hex_str32(str);
+                          } else {
+                            if (str[0] == '"' || str[0] == '\'') {  // remove quotes
+                              str.pop_back();
+                              str.erase(str.begin());
+                            }
+                            log_printf("Parameter value is: %s\n", str.c_str());
+                            val = string_to_hex_str32(str);       // "me" -> 6d65000000000000000000000000000000000000000000000000000000000000
                           }
-                          log_printf("Parameter value is: %s\n", str.c_str());
-                          val = string_to_hex_str32(str);       // "me" -> 6d65000000000000000000000000000000000000000000000000000000000000
                         }
 
                         log_printf("Parameter '%s' has static type '%s' with value %s\n", it.first.c_str(), it.second.c_str(), val.c_str());                        

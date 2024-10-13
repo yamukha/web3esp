@@ -73,16 +73,18 @@ int main(int argc, char *argv[])
         //std::string m = c.buildMethod("%s(%s)","set_string","'some parameter maximum value = '");
         //std::string m = c.buildMethod("%s(%llu,%llu)","set_output", 3, cnt);
         //std::string m = c.buildMethod("%s(%llu)","set_output", 3);
-        std::string m = c.buildMethod("%s(%s)","set_bytes", "'one'");
+        // std::string m = c.buildMethod("%s(%s)","set_bytes", "'one'");
         //std::string m = c.buildMethod("%s(%s)","set_bytes", "'hello bytes 42'");
         //std::string m = c.buildMethod("%s(%s)","set_bool", "true");
         //std::string m = c.buildMethod("%s", "get_output()";
 
-        //std::string m = "set_string(\"some 'parameter maximum value = \",1234567890123444556)";
+        // std::string m = "set_string(\"some 'parameter maximum value = \",1234567890123444556)";
         // std::string m = "set_string(\"me\")";
         // std::string m = "set_output(3,42)";
         // std::string m = "set_output(3)";
         // std::string m = "set_bytes('one')";
+        //std::string m = "set_bytes([a 1 0 0xr2 0x3 0xff 0x7 00 127 000 255 256 0x09 xx])";
+        std::string m = "set_bytes([0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31])";
         // std::string m = "set_bool(true)";
         //std::string m = "get_output()";
 
