@@ -4,11 +4,9 @@
 #include <Arduino.h>
 
 #include <DefineEth.h>
-#include <TX.h>
 #include <RpcEth.h>
-#include <ethsign.h>
-
 #include <Web3e.h>
+#include <ethsign.h>
 #include <Contract.h>
 #include <contract_g5.h>
 

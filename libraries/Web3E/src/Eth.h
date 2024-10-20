@@ -1,10 +1,6 @@
 #ifndef ETH_PROVIDER_H
 #define ETH_PROVIDER_H
 
-#include <DefineEth.h>
-// ethSign()
-#include <ethsign.h>
-
 #ifndef USE_LINUX
 
 #ifdef ESP32_MODEL
@@ -16,11 +12,15 @@
 #endif
 
 #include <Accounts.h>
-#include <TX.h>
+#include <DefineEth.h>
+// ethSign()
+#include <ethsign.h>
 
 #else
-#include "../rlp/TX.h"
 #include "Accounts.h"
+#include "../RpcEth/DefineEth.h"
+// ethSign()
+#include "../RpcEth/ethsign.h"
 #endif
 
 #include <string>
@@ -86,7 +86,7 @@ public:
     }
     return "";
   };
-  std::string signTransaction(TX &tx, std::string &address)
+  std::string signTransaction(struct TX &tx, std::string &address)
   {
     return signTransaction(tx.nonce, tx.v, tx.gasPrice, tx.gasLimit, tx.to, tx.value, tx.data, address);
   };

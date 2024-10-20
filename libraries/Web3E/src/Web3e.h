@@ -16,8 +16,8 @@
 #endif
 
 #else
-#include "DefineEth.h"
-#include "RpcEth.h"
+#include "../RpcEth/DefineEth.h"
+#include "../RpcEth/RpcEth.h"
 #include "Eth.h"
 #endif
 
