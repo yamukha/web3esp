@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 #include <DefineEth.h>
+#include <TX.h>
 #include <RpcEth.h>
 #include <ethsign.h>
 

@@ -16,8 +16,10 @@
 #endif
 
 #include <Accounts.h>
+#include <TX.h>
 
 #else
+#include "../rlp/TX.h"
 #include "Accounts.h"
 #endif
 
