@@ -9,6 +9,7 @@
 #include <string.h>
 
 #define FORCE_SMART_CONTRACT
+// #define LOW_LEVEL_SIGNER
 
 #include "RpcEth/ethsign.h"
 #include "RpcEth/JsonUtilsEth.h"
@@ -72,13 +73,10 @@ int main(int argc, char *argv[])
         log_printf("Simple transaction mode\n");
         tx.nonce = nonce;
         tx.gasPrice = "0x04a817c800";
-        tx.gasLimit = "0x1e8480";
         tx.to = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // ETH address
         tx.value = "0x0386a0";
         tx.data = std::to_string(cnt).c_str();
         tx.v = chainID;
-        tx.r = "0x00";
-        tx.s = "0x00";
     }
     else
     {
@@ -93,7 +91,8 @@ int main(int argc, char *argv[])
         // std::string m = c.buildMethod("%s(%s)","set_bytes", "'one'");
         //std::string m = c.buildMethod("%s(%s)","set_bytes", "'hello bytes 42'");
         std::string bytes = "[" + std::to_string(cnt/256) + " " + std::to_string(cnt%256) + " 0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31]";
-        log_printf("Bytes: %s\n", bytes.c_str());
+        // std::string bytes = "[" + std::to_string(cnt/256) + " " + std::to_string(cnt%256) + " 0 1 0x2 0x03 4 5 6 7 8 9 10 11]";   
+        log_printf("Bytes: %s len:%ld\n", bytes.c_str(), bytes.size());
         std::string m = c.buildMethod("%s(%s)","set_bytes", bytes.c_str());
         //std::string m = c.buildMethod("%s(%s)","set_bytes", "[0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31]");
         //std::string m = c.buildMethod("%s(%s)","set_bool", "true");
@@ -111,28 +110,14 @@ int main(int argc, char *argv[])
 
         log_printf("Called method: %s\n", m.c_str());
 
-        auto fhash = c.funcHash(m);
-        CallData cd = c.doCall(m);
-        log_printf("Chain ID: %s Nonce: %s\n", chainID.c_str(), nonce.c_str());
-        std::string data = fhash + cd.stat + cd.dynamic;
-        log_printf("Calldata: \n%s\nCalldata len: %lu\n", data.c_str(), data.size());
-
-        //for (auto& item : scmSig) {
-        //    auto i =  &item  - &scmSig[0];
-        //   log_printf("method %ld:  %s\n", i ,item.fname.c_str());
-        //}
-
+        //log_printf("Chain ID: %s Nonce: %s\n", chainID.c_str(), nonce.c_str());
         tx.nonce = nonce;
         tx.gasPrice = "0x77359400";  // 2000000000 -> 0x77359400
-        tx.gasLimit = "0x1e8480"; // 2000000 -> "0x1e8480"
         // tx.to =   "0xe78a0f7e598cc8b0bb87894b0f60dd2a88d6a8ab";  // smart contract address
-        // tx.to =   "0x254dffcd3277c0b1660f6d42efbb754edababc2b"; // smart contract address
-        tx.to = "0xd9145CCE52D386f254917e481eB44e9943F39138"; // smart contract address
-        tx.value = "0"; // zero for smart contract //"0x0386a0";
-        tx.data = data; // size 200 is max
+        // tx.to =   "0x3254dffcd3277c0b1660f6d42efbb754edababc2b"; // smart contract address
+        tx.to = "0xD028ec274Ef548253a90c930647b74C830Ed4b4F";
+        tx.data = c.doCall(m); // size 200 is max
         tx.v = chainID; // chain_id + 35 + {0,1} is parity of y for curve point, where chain_id = 1337 for private chain; ref. https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
-        tx.r = "0x00";
-        tx.s = "0x00";
     }
     uint8_t privkey[KEYS_SIZE];
     rlp.hex2bin(key.c_str(), (char *)privkey);
@@ -157,7 +142,7 @@ int main(int argc, char *argv[])
     log_printf("address by eth_account(): %s\n", eth_account.c_str());
 
 #ifdef LOW_LEVEL_SIGNER
-    std::string raw_transaction = ethSign(tx.nonce, chain_str, tx.gasPrice, tx.gasLimit, tx.to, tx.value, tx.data, privkey, pubkey);
+    std::string raw_transaction = ethSign(tx.nonce, tx.v, tx.gasPrice, tx.gasLimit, tx.to, tx.value, tx.data, privkey, pubkey);
     log_printf("\nRaw eth low level signed transaction:\n%s\n", raw_transaction.c_str());
     log_printf("'%s'\n", ethJson("eth_sendRawTransaction", raw_transaction, std::atoi(rpcid_str.c_str())).c_str());
 #else

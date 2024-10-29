@@ -305,19 +305,19 @@ std::string bytes_to_hex_str32(std::string &str)
     return res;
 };
 
-CallData doCall (std::string& signature) {
+CallData doCallData (std::string& method) {
     CallData calldata;
     std::string stat = "";
     std::string dyna = "";
 
     int args = -1;
-    auto fname = split(signature, '(');
+    auto fname = split(method, '(');
     
     // get count of arguments
-    if (signature.find("()") != std::string::npos){
+    if (method.find("()") != std::string::npos){
       args = 0;
     } else 
-      args = std::count(signature.begin(),signature.end(),',') + 1;
+      args = std::count(method.begin(),method.end(),',') + 1;
 
     log_printf("Method has  %d args\n", args);
 
@@ -373,7 +373,23 @@ CallData doCall (std::string& signature) {
                           }
                         }
 
-                        log_printf("Parameter '%s' has static type '%s' with value %s\n", it.first.c_str(), it.second.c_str(), val.c_str());                        
+                        log_printf("Parameter '%s' has static type '%s' with value %s\n", it.first.c_str(), it.second.c_str(), val.c_str());
+                        if (it.second.find("bytes") != std::string::npos ) {
+                          // get actual lenth to expected in bytes type
+                          std::string bytes_cnt = it.second.substr(5); // length of "bytes"
+                          log_printf("Expected size of type: %s %s\n", it.second.c_str(), bytes_cnt.c_str());
+                          int bsz{std::atoi(bytes_cnt.c_str())};
+                          if (bsz > 0) {
+                            for (bsz; bsz < 32; bsz++) {
+                              if (val[bsz *2] != '0' || val[bsz *2 +1] != '0'){
+                                log_printf("%d:%c%c ",bsz, val[bsz *2], val[bsz * 2 + 1]);
+                              };
+                              val[bsz *2] = '0';
+                              val[bsz *2 + 1] = '0';
+                            };
+                            log_printf("\n");
+                          };
+                        }
                         stat += val;
                         log_printf("Encoded static:\n%s\n", stat.c_str());
                         prm_counter++; 
@@ -410,6 +426,17 @@ CallData doCall (std::string& signature) {
     calldata.dynamic = dyna;
     return calldata;
 };
+
+std::string doCall (std::string& method) {
+  std::string data = "";
+  std::string fhash = funcHash(method);
+  if (fhash != "") {
+    CallData cd = doCallData(method);
+    data = fhash + cd.stat + cd.dynamic;
+    log_printf("Calldata: \n%s\nCalldata len: %lu\n", data.c_str(), data.size());
+  }
+  return data;
+}
 
 }; // class 
 

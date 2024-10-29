@@ -128,13 +128,10 @@ void loop()
       {
         tx.nonce = nonce;
         tx.gasPrice = "0x04a817c800";
-        tx.gasLimit = "0x1e8480";
         tx.to = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // ETH address
         tx.value = "0x0386a0";
         tx.data = std::to_string(cnt).c_str();
         tx.v = chainID;
-        tx.r = "0x00";
-        tx.s = "0x00";
         raw_transaction = web3.eth.signTransaction(tx, web3.eth.defaultAccount);
       }
       else // smart contract call
@@ -144,19 +141,12 @@ void loop()
         std::string bytes =  "[" + std::to_string(cnt%256) + " " + std::to_string(cnt/256) + " 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100]";
         std::string m = c.buildMethod("%s(%s)","set_bytes", bytes.c_str());
         log_printf("Called method: %s\n", m.c_str());
-        auto fhash = c.funcHash(m);
-        CallData cd = c.doCall(m);
-        std::string data = fhash + cd.stat + cd.dynamic;
 
         tx.nonce = nonce;
         tx.gasPrice = "0x77359400";  // 2000000000 -> 0x77359400
-        tx.gasLimit = "0x1e8480"; // 2000000 -> "0x1e8480"
         tx.to = "0xd9145CCE52D386f254917e481eB44e9943F39138"; // smart contract address
-        tx.value = "0"; // zero for smart contract //"0x0386a0";
-        tx.data = data; // size 200 is max
+        tx.data = c.doCall(m); // size 200 is max
         tx.v = chainID; // chainID; //"0x0539"; // chain_id + 35 + {0,1} is parity of y for curve point, where chain_id = 1337 for private chain; ref. https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
-        tx.r = "0x00";    // then be calculated i.e. "0x5bdcbfcfd8b8d113b678bd34e8d2cc7cdcdd77e9c2189beafc5a64207fc53b3b";
-        tx.s = "0x00";    // then be calculated i.e. "0x5c5b1c73e65e9a4e9c73b13e3825f517efcc35eac11958c7f314b57c39006738";        
         raw_transaction = web3.eth.signTransaction (tx,  web3.eth.defaultAccount);
       }
       log_printf("Is contract %d, nonce: %s, raw transaction:\n%s\n", isContract, nonce.c_str(), raw_transaction.c_str());
