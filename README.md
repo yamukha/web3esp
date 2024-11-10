@@ -2,7 +2,7 @@
 
 # Inplemented extrinsic methods
 Transfer balance as Raw Transaction\
-Smart contract (see smart contract example in libraries/contracts). Note: supported uint256 and string type
+Smart contracts: ref. libraries/contracts/README.md
 
 # Implementetiaon
 Refference pyton scripts: web3eth.py (high level) and rlp4eth.py (low level, based on secp256k1 library for ECDSA sign)\
@@ -32,7 +32,7 @@ In case of smart contract usage is needed to upload it, i.e. by Remix to local h
 # Test cases:
 1. Test on Linux and python implementation (ref. to cripts code):
 2. Test on Linux C++ implementation:\
-build linux binary and run python script:\
+build linux (using ./build.sh) binary and then run python script:\
 python3 ethraw.py [rpcId] [ethHost] [privKey]\
 i.e.\
 python3 ethraw.py 1 http://192.168.0.106:8545 4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d
