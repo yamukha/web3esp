@@ -350,12 +350,27 @@ CallData doCallData (std::string& method) {
                           auto number = std::stoll(params[prm_counter], nullptr, 10);  // get signed parameter
                           val = number_to_hex_str32(number);
                         } else if (bool_types.count(it.second)) { // for bool
-                          log_printf("Parameter bool: %s\n",it.second.c_str());
+                          log_printf("Parameter '%s' type '%s' has: '%s'\n", it.first.c_str(), it.second.c_str(), params[prm_counter].c_str());
                           if (params[prm_counter] == "true") {
                             val = number_to_hex_str32(1);
                           } else {
                             val = number_to_hex_str32(0);
-                        }
+                          }
+                        } else if (address_types.count(it.second)) { // for address as uint160 or 20 bytes like 0x1234567890123456789012345678901234567890
+                          log_printf("Parameter '%s' type '%s' has: '%s'\n", it.first.c_str(), it.second.c_str(), params[prm_counter].c_str());
+                          std::string addr = params[prm_counter];
+                          addr[1] = std::tolower(addr[1]);
+                          // if starts from 0x remove it check if it is 20 bytes len, optional if has correct symblos 0...f 
+                          if (addr[0] == '0' && addr[1] == 'x') {  // remove 0x
+                            addr.erase(addr.begin());
+                            addr.erase(addr.begin());
+                          }
+                          log_printf("Parameter '%s' with '%s' size %lu \n", it.second.c_str(), addr.c_str(), addr.size());
+                          if (addr.size() != 40) {
+                            log_printf("Wrong size %lu -> address be set to 0", addr.size());
+                            addr="0000000000000000000000000000000000000000";
+                          }
+                          val = "000000000000000000000000" + addr; // 0x1234567890123456789012345678901234567890 -> 0000000000000000000000001234567890123456789012345678901234567890
                         } else if (byte_types.count(it.second)) { // for any of bytes<M>, 0 < M <= 32, i.e. bytes3 = "abc"
                           std::string str = params[prm_counter];  // get real parameter
                           // if smth. like [0x0 0x42 ...] or [0 33 ...] handle as list of chars

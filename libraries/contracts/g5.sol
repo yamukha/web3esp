@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 // Creating a contract
 contract g5
 {
-
     uint256 private cnt;
     uint256 private x;
     uint256 private y;
+    mapping(address => bool) allowedAddr;
 
     function get_output() public returns (string memory){
         cnt++;
@@ -43,5 +43,13 @@ contract g5
 
     function set_bool(bool flag) public pure returns (string memory){
         return  string(abi.encodePacked(flag));
+    }
+
+    function set_allowed (address addr, bool allowed) public {
+        allowedAddr[addr] = allowed;
+    }
+
+    function is_allowed (address addr) public view returns (bool) {
+        return allowedAddr[addr];
     }
 }

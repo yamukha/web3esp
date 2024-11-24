@@ -3,7 +3,7 @@ There is implemented solution to create, sign and transmit smart contracts direc
 Limited set of ABI types allows to submit to blockchain sensor data, alarms, short messages etc.
 
 # Supported ABI types
-- static types: bool, (u)int<M> (up 64 bits), bytes<M>
+- static types: address, bool, (u)int<M> (up 64 bits), bytes<M>
 - dynamic types: string (with size up 32 bytes in two notations:
  list/array of of chars, i.e.: [0 0x2 33 42]\
  as string literal, i.e: "test string"\
@@ -40,7 +40,7 @@ Call smart contract constructor, extract methods from it's ABI description and b
 ```
 Contract c;
 std::vector <ScmSig> scmSig = c.abiParser(contract_g5);
-std::string bytes = "[" + std::to_string(cnt/256) + " " + std::to_string(cnt%256)]"; // use counter current value
+std::string bytes = "[" + std::to_string(cnt/256) + " " + std::to_string(cnt%256) + "]"; // use counter current value
 std::string m = c.buildMethod("%s(%s)","set_bytes", bytes.c_str());
 auto cd = c.doCall(m);
 ```

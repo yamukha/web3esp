@@ -2,7 +2,8 @@
 #define CONTRACT_G5_H
 #include <string>
 
-const std::string contract_g5 = R"([
+const std::string contract_g5 = R"(
+[
 	{
 		"inputs": [],
 		"name": "get_output",
@@ -13,6 +14,43 @@ const std::string contract_g5 = R"([
 				"type": "string"
 			}
 		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "addr",
+				"type": "address"
+			}
+		],
+		"name": "is_allowed",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "addr",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "allowed",
+				"type": "bool"
+			}
+		],
+		"name": "set_allowed",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},

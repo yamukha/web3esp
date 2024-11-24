@@ -136,10 +136,11 @@ void loop()
       }
       else // smart contract call
       {
+        std::string m = c.buildMethod("%s(%s,%s)", "set_allowed", "0xD028ec274Ef548253a90c930647b74C830Ed4b4F", "true");
         // std::string m = c.buildMethod("%s(%s,%llu)", "set_string", "'some parameter maximum value = '", cnt);
         // std::string m = c.buildMethod("%s(%s)","set_bytes", "[0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31]");
-        std::string bytes =  "[" + std::to_string(cnt%256) + " " + std::to_string(cnt/256) + " 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100]";
-        std::string m = c.buildMethod("%s(%s)","set_bytes", bytes.c_str());
+        // std::string bytes =  "[" + std::to_string(cnt%256) + " " + std::to_string(cnt/256) + " 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100]";
+        // std::string m = c.buildMethod("%s(%s)","set_bytes", bytes.c_str());
         log_printf("Called method: %s\n", m.c_str());
 
         tx.nonce = nonce;

@@ -83,17 +83,18 @@ int main(int argc, char *argv[])
         log_printf("Smart contract mode\n");
         Contract c;
         std::vector <ScmSig> scmSig = c.abiParser(contract_g5);
-        c.AllFunctions(scmSig);    
+        c.AllFunctions(scmSig);
+        std::string m = c.buildMethod("%s(%s,%s)", "set_allowed", "0xD028ec274Ef548253a90c930647b74C830Ed4b4F", "true");
         //std::string m = c.buildMethod("%s(%s,%llu)","set_string","'some parameter maximum value = '", cnt);
         //std::string m = c.buildMethod("%s(%s)","set_string","'some parameter maximum value = '");
         //std::string m = c.buildMethod("%s(%llu,%llu)","set_output", 3, cnt);
         //std::string m = c.buildMethod("%s(%llu)","set_output", 3);
         // std::string m = c.buildMethod("%s(%s)","set_bytes", "'one'");
         //std::string m = c.buildMethod("%s(%s)","set_bytes", "'hello bytes 42'");
-        std::string bytes = "[" + std::to_string(cnt/256) + " " + std::to_string(cnt%256) + " 0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31]";
+        // std::string bytes = "[" + std::to_string(cnt/256) + " " + std::to_string(cnt%256) + " 0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31]";
         // std::string bytes = "[" + std::to_string(cnt/256) + " " + std::to_string(cnt%256) + " 0 1 0x2 0x03 4 5 6 7 8 9 10 11]";   
-        log_printf("Bytes: %s len:%ld\n", bytes.c_str(), bytes.size());
-        std::string m = c.buildMethod("%s(%s)","set_bytes", bytes.c_str());
+        // log_printf("Bytes: %s len:%ld\n", bytes.c_str(), bytes.size());
+        // std::string m = c.buildMethod("%s(%s)","set_bytes", bytes.c_str());
         //std::string m = c.buildMethod("%s(%s)","set_bytes", "[0 1 0x2 0x03 4 5 6 7 8 9 10 11 12 13 14 15 16 0x11 18 19 20 21 22 23 24 25 26 27 28 29 30 fg 0x100 256 31]");
         //std::string m = c.buildMethod("%s(%s)","set_bool", "true");
         //std::string m = c.buildMethod("%s", "get_output()";
@@ -113,9 +114,9 @@ int main(int argc, char *argv[])
         //log_printf("Chain ID: %s Nonce: %s\n", chainID.c_str(), nonce.c_str());
         tx.nonce = nonce;
         tx.gasPrice = "0x77359400";  // 2000000000 -> 0x77359400
-        // tx.to =   "0xe78a0f7e598cc8b0bb87894b0f60dd2a88d6a8ab";  // smart contract address
+        tx.to =   "0xe78a0f7e598cc8b0bb87894b0f60dd2a88d6a8ab";  // smart contract address
         // tx.to =   "0x3254dffcd3277c0b1660f6d42efbb754edababc2b"; // smart contract address
-        tx.to = "0xD028ec274Ef548253a90c930647b74C830Ed4b4F";
+        // tx.to = "0xD028ec274Ef548253a90c930647b74C830Ed4b4F";
         tx.data = c.doCall(m); // size 200 is max
         tx.v = chainID; // chain_id + 35 + {0,1} is parity of y for curve point, where chain_id = 1337 for private chain; ref. https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
     }
