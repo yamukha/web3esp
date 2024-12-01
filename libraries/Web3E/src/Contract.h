@@ -448,7 +448,7 @@ std::string doCall (std::string& method) {
   if (fhash != "") {
     CallData cd = doCallData(method);
     data = fhash + cd.stat + cd.dynamic;
-    log_printf("Calldata: \n%s\nCalldata len: %lu\n", data.c_str(), data.size());
+    log_printf("Calldata: \n0x%s\nCalldata len: %lu\n", data.c_str(), data.size());
   }
   return data;
 }

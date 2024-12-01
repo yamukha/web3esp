@@ -3,10 +3,13 @@
 // python3 ethraw.py 1 http://192.168.0.106:8545 4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d
 // ./ecdsa nonce chainId rpcId privKey
 // ./ecdsa 0x1 0x539 1 4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d | tail -n 1
+//  for smart contract
+// ./ecdsa 0x1 0x539 1 4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d 'set_allowed(0xD028ec274Ef548253a90c930647b74C830Ed4b4F,true)'
 
 #include <random>
 #include <stdio.h>
 #include <string.h>
+#include <fstream>
 
 #define FORCE_SMART_CONTRACT
 // #define LOW_LEVEL_SIGNER
@@ -33,9 +36,8 @@ int main(int argc, char *argv[])
     std::string rpcid_str = "0";
     std::string key = PRIV_ETH_KEY;
     std::string scFunc = "'get_output()'";
-    std::string scArg1 = "42";
-    std::string scArg2 = "3";
     bool isContract = false;
+    std::string contract_abi = contract_g5;
 
     std::random_device dev;
     std::mt19937 rng(dev());
@@ -57,17 +59,21 @@ int main(int argc, char *argv[])
             scFunc = argv[i];
             isContract = true;
         }
-        if (i == 6)
-           scArg1 = argv[i];
-        if (i == 7)
-           scArg2 = argv[i];
+        if (i == 6) {
+          std::ifstream t(argv[i]);
+          std::stringstream buffer;
+          buffer << t.rdbuf();
+          contract_abi = buffer.str();
+          if (contract_abi.size() == 0) {
+            log_printf("Cannot read abi from file %s\n", argv[i]);
+            exit(-1);
+          }
+        }
     }
 
     RLP rlp;
     struct TX tx;
-#ifdef FORCE_SMART_CONTRACT
-    isContract = true; // true to forse smart contract
-#endif
+
     if (!isContract) // simple Transaction
     {
         log_printf("Simple transaction mode\n");
@@ -82,9 +88,10 @@ int main(int argc, char *argv[])
     {
         log_printf("Smart contract mode\n");
         Contract c;
-        std::vector <ScmSig> scmSig = c.abiParser(contract_g5);
+        std::vector <ScmSig> scmSig = c.abiParser(contract_abi);
         c.AllFunctions(scmSig);
-        std::string m = c.buildMethod("%s(%s,%s)", "set_allowed", "0xD028ec274Ef548253a90c930647b74C830Ed4b4F", "true");
+        std::string m = scFunc;
+        // std::string m = c.buildMethod("%s(%s,%s)", "set_allowed", "0xD028ec274Ef548253a90c930647b74C830Ed4b4F", "true");
         //std::string m = c.buildMethod("%s(%s,%llu)","set_string","'some parameter maximum value = '", cnt);
         //std::string m = c.buildMethod("%s(%s)","set_string","'some parameter maximum value = '");
         //std::string m = c.buildMethod("%s(%llu,%llu)","set_output", 3, cnt);
