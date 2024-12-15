@@ -39,6 +39,8 @@ python3 ethraw.py 1 http://192.168.0.106:8545 4f3edf983ac636a65a842ce7c78d9aa706
 3. Test with ESP implementation:\
 Ref. to deploy section.\
 Note: ganache chain node and ESP should be in the same subnet
+4. Unit tests for RPL and ABI serialization:\
+python3 test_rpl.py
 
 # CI
 There are in .github/workflows/ files:\

@@ -159,7 +159,7 @@ std::string ethSign(std::string nonce, std::string chain, std::string price, std
   std::string ser = header + enc;
 
 #ifdef DEBUG_PRINT
-  log_printf("RPL of unsigned transaction, no header: size = %ld\n0x%s", strlen(enc.c_str()), enc.c_str());
+  log_printf("RPL of unsigned transaction, no header: size = %ld\n0x%s\n", strlen(enc.c_str()), enc.c_str());
   log_printf("RPL encoded len : 0x%s\n", header.c_str());
   log_printf("RPL of unsigned transaction with header: size = %ld\n0x%s", strlen(ser.c_str()), ser.c_str());
 #endif
