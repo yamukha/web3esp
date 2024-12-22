@@ -1,7 +1,5 @@
 import subprocess, sys
 import json
-from eth_keys import keys
-from eth_utils import decode_hex
 
 def isHex(s):
     try:
