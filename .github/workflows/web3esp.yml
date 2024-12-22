@@ -1,24 +1,28 @@
-name: web3esp 
+name: web3esp
 on:
   push:
   workflow_dispatch:
-    branches: 
+    branches:
     - master
     - main
 
 jobs:
    esp:
     runs-on: ubuntu-latest
-   
+
     steps:
       - name: Install arduino-cli for esp
         run: |
           sudo apt-get update -y
           sudo apt-get install curl git libsecp256k1-dev libjsoncpp-dev python3-pip -y
+          sudo apt-get install -y nodejs npm
+          npm install -g rlp
+          npm install -g @hacken/abi-decode-cli
+          node -v
           pip3 install pyserial
           cd ~
-          mkdir arduino-init 
-          cd arduino-init 
+          mkdir arduino-init
+          cd arduino-init
           curl -L -o arduino-cli.tar.bz2 https://downloads.arduino.cc/arduino-cli/arduino-cli-latest-linux64.tar.bz2
           tar xjf arduino-cli.tar.bz2
           sudo mv arduino-cli /usr/bin/arduino-cli
@@ -30,14 +34,14 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install esp8266:esp8266
           arduino-cli core install esp32:esp32@2.0.14
-        
+
       - name: Clone web3 esp repo
         run: |
-          echo " git clone" 
+          echo " git clone"
           cd ~
           #git clone https://github.com/airalab/robonomics-client-cpp.git
           git clone https://github.com/yamukha/web3esp.git
-          cd web3esp 
+          cd web3esp
           ARDUINO_SKETCH=$(arduino-cli config dump | grep sketchbook_path | awk '{ print $2 }')
           mkdir $ARDUINO_SKETCH
           cp -r libraries/ $ARDUINO_SKETCH/
@@ -47,7 +51,7 @@ jobs:
       - name: Build
         run: |
           ARDUINO_SKETCH=$(arduino-cli config dump | grep sketchbook_path | awk '{ print $2 }')
-          cd $ARDUINO_SKETCH 
+          cd $ARDUINO_SKETCH
           /usr/bin/arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 rpcjsonc.ino
           patch libraries/RpcEth/DefineEth.h libraries/RpcEth/esp32.diff
           /usr/bin/arduino-cli compile --fqbn esp32:esp32:nodemcu-32s rpcjsonc.ino
@@ -59,14 +63,15 @@ jobs:
       # arduino-cli upload --port /dev/ttyUSB0 --fqbn esp8266:esp8266:nodemcuv2
       # arduino-cli upload --port /dev/ttyUSB0 --fqbn esp32:esp32:nodemcu-32s:UploadSpeed=115200
       # arduino-cli upload --port /dev/ttyACM0 --fqbn esp32:esp32:esp32s3
-      
+
       # Testing on Linux platform
-      - name: build on Linux  
+      - name: build on Linux
         run: |
           ARDUINO_SKETCH=$(arduino-cli config dump | grep sketchbook_path | awk '{ print $2 }')
           cd $ARDUINO_SKETCH
           cd libraries
           ./build.sh
+          python3 test_rlp.py
 
       #- name: Library Unit tests
         #run: |
