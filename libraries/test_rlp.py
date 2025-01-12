@@ -1,5 +1,77 @@
 import subprocess, sys
 import json
+import binascii
+
+def encodeABIbytes( bytesM, typeM):
+  encoded = ""
+  m = typeM.split("bytes")
+  mlen = int(m[1]) * 2
+  msize = int(m[1]) * 2
+
+  if bytesM[0] == "[" and bytesM[-1] == "]":
+    mbs = bytesM[1:-1]
+    mbytes = mbs.split(" ")
+    for ch in mbytes:
+      if isHex(ch):
+        if "0x" in ch or "0X" in ch:
+          h = int(ch, 16)
+          encoded += format(h, '02x')
+        else:
+          h = int(ch)
+          encoded += format(h, "02x")
+  else:
+    for ch in bytesM:
+      encoded += format(ord(ch), "02x")
+    mlen -= len(encoded)
+    for ch in range(mlen):
+      encoded += "0"
+  if len(encoded) > msize :
+    encoded = encoded [:msize]
+  return "0x" + encoded
+
+def testParams(method, index, payload):
+  # print (f"test method: '{method}'")
+  params = method[0].strip()  # 'get_output()' or set_string('some parameter maximum value = ',1234567890123444556)
+  types  = method[1].strip()  # "" or "string,uint256"
+  if types == "":
+    return True
+  else:
+    mtypes = types.split(",")
+    mtype = mtypes[index-1]
+
+    if params[0] == '"' or params[0] == "'":
+      params = params[1:-1] # remove external escaping symbols
+
+    mparams = params[0:-1].split("(")
+    mpars = mparams[1]
+    mparameters = mpars.split(",")
+
+    mval  = mparameters[index-1]
+    # print (f"value: '{mval}'")
+    if mval[0] == '"' or mval[0] == "'": # ["\"set_string('Hello robo')\"", "string", "0xc9615770"],
+      mval = mval[1:-1]
+      # print (f"value: '{mval}'") # remove external escaping symbols for string
+
+    # print (f"param type: '{mtype}', value: '{mval}'")
+
+    decoded = payload.split(" (")
+    cval  = decoded[0]
+    dtype = decoded[1]
+    ctype = dtype[:-1]
+
+    # encode if bytesM
+    if "bytes" == mtype[:5] :
+      mval = encodeABIbytes(mval, mtype)
+      # print (f"encoded bytes: {cval}")
+
+    if cval == mval and ctype == mtype:
+      return True
+    else:
+      if cval != mval:
+        print (f"decoded parameter value '{cval}' is not equal to '{mval}'")
+      if ctype != mtypes[index-1]:
+        print (f"decoded parameter type '{ctype}' is not equal to '{mtype}'")
+      return False
 
 def isHex(s):
     try:
@@ -180,7 +252,7 @@ abi_conracts = [
     ["\"set_string('some parameter maximum value = ',1234567890123444556)\"", "string,uint256", "0xa4965edc"]
 ]
 
-for sm_call in abi_conracts:
+for ic, sm_call in enumerate(abi_conracts):
     cmd = "./ecdsa " + classicTx[0] + " " + classicTx[1] + " 12 " + classicTx[2] + " " + sm_call[0] + grep_call
     res = subprocess.check_output (cmd, shell = True, executable="/bin/bash") #, stdout = subprocess.STDOUT)
     abi = str(res,'utf-8').rstrip()
@@ -192,11 +264,23 @@ for sm_call in abi_conracts:
     cd = str(rsp,'utf-8').rstrip()
     print(cd)
     sc_res = cd.split("\n")
-    sc_call = sc_res[0].split(":")
-    sc_hash = sc_call[1].strip()
-    if sc_hash != sm_call[2]:
-      print(f'hash {sc_hash} != {sm_call[2]}')
-      testOK = False
+    for i, lines in enumerate(sc_res):
+      if i == 0:
+        # get decoded call method hash
+        sc_call = sc_res[0].split(":")
+        sc_hash = sc_call[1].strip()
+        # test call hash
+        if sc_hash != sm_call[2]:
+          print(f'hash {sc_hash} != {sm_call[2]}')
+          testOK = False
+      else:
+        # get decoded call parameters
+        sc_param = sc_res[i].split(":")
+        sc_val = sc_param[1].strip()
+        # test call parameters
+        if not testParams(sm_call, i, sc_val):
+          print (f"Error to check param: {i}, value: '{sc_val}'")
+          exit(1)
 
 if  testOK:
     exit(0)
