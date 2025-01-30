@@ -79,6 +79,7 @@ def verifyRaw(pk, vk, msg, raw):
   signature = signerPrivKey.sign_msg(msg)
   signature.r = int(tx.r, 16)
   signature.s = int(tx.s, 16)
+  signature.v = tx.v - tx.chain_id * 2 - 35
 
   print('Signature: [r = {0}, s = {1}, v = {2}]'.format(hex(signature.r), hex(signature.s), hex(signature.v)))
   vks = '0x' + vk.hex()
@@ -97,6 +98,7 @@ def verifyRaw(pk, vk, msg, raw):
 
   return valid
 
+chainId = "0x539"
 pks = '4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d'
 vks = 'e68acfc0253a10620dff706b0a1b1f1f5833ea3beb3bde2250d5f271f3563606672ebc45e0b7ea2e816ecb70ca03137b1c9476eec63d4632e990020b7b6fba39'
 pk = bytes.fromhex(pks)
@@ -108,18 +110,19 @@ grep_raw = ' | grep -e "Final s" -e "Final r" -e "signed transaction:"  -e "tran
 testOK = True
 
 # nonce, chainId, privKey, gasPrice, to , value, 
-classicTx =  ["0xfffeff", "0x539", pks, "0x04a817c800", "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", "0x0386a0"]
-contractTx = ["0xfffeff", "0x539", pks, "0x77359400", "0xe78a0f7e598cc8b0bb87894b0f60dd2a88d6a8ab", ""]
+classicTx =  ["0xfffeff", chainId, pks, "0x04a817c800", "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", "0x0386a0"]
+contractTx = ["0xfffeff", chainId, pks, "0x77359400", "0xe78a0f7e598cc8b0bb87894b0f60dd2a88d6a8ab", ""]
 
 # cmd = "./ecdsa " + classicTx[0] + " " + classicTx[1] + " " + classicTx[2] + " " + " 'set_output(3)'
 #                      nonce              chainId       rpcId       pKey
 cmd = "./ecdsa " + classicTx[0] + " " + classicTx[1] + " 12 " + classicTx[2] + " " + grep_raw
 res = subprocess.check_output (cmd, shell = True, executable="/bin/bash")
 grepped = str(res,'utf-8').rstrip()
-print(f'grepped: {grepped}')
+#print(f'grepped: {grepped}')
 
 (raw_str, msg_str) = getRawAndMsg (grepped)
 msg = bytes.fromhex(msg_str)
+print(f'raw: {raw_str}')
 print(f'msg: {msg_str}')
 
 # verify transaction without smart contract
@@ -153,6 +156,7 @@ for sm_call in conracts:
    
     (raw_str, msg_str) = getRawAndMsg (grepped)
     msg = bytes.fromhex(msg_str)
+    print(f'raw: {raw_str}')
     print(f'msg: {msg_str}')
 
     # verify transaction without smart contract
@@ -160,6 +164,7 @@ for sm_call in conracts:
       print('! Failed unsigned classic transaction RPL encoding')
       testOK = False
 
+print(f'Test OK: {testOK}')
 if  testOK:
     exit(0)
 else:
