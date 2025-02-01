@@ -20,6 +20,8 @@ jobs:
           npm install -g @hacken/abi-decode-cli
           node -v
           pip3 install pyserial
+          python3 -m pip install eth-typing eth-utils eth-keys rlp web3
+
           cd ~
           mkdir arduino-init
           cd arduino-init
@@ -72,6 +74,7 @@ jobs:
           cd libraries
           ./build.sh
           python3 test_rlp.py
+          python3 test_sig.py
 
       #- name: Library Unit tests
         #run: |
