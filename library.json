@@ -1,0 +1,28 @@
+{
+    "name": "web3esp",
+    "version": "0.1.0",
+    "description": "Send transaction or call smart contract from ESP32 or ESP8266 to Eth blockchain",
+    "keywords": "Web3, blockchain, smart contract, transaction",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/yamukha/web3esp"
+    },
+    "authors":
+    {
+        "name": "yamukha",
+        "url": "https://github.com/yamukha"
+    },
+    "license": "MIT",
+    "homepage": "https://github.com/yamukha",
+    "dependencies": {
+      "arduino-libraries/Arduino_JSON": "0.2.0"
+    },
+    "export": {
+      "include": [
+        "libraries/*"
+      ]
+    },
+    "frameworks": "*",
+    "platforms": "*"
+  }
